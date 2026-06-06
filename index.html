@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我愛你</title>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    background:black;
+}
+
+canvas{
+    display:block;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let particles = [];
+let formed = false;
+let showText = false;
+
+// 建立愛心座標
+function createHeart(){
+
+    const points = [];
+
+    for(let i=0;i<3000;i++){
+
+        let t = Math.random()*Math.PI*2;
+
+        let x = 16*Math.pow(Math.sin(t),3);
+
+        let y =
+        13*Math.cos(t)
+        -5*Math.cos(2*t)
+        -2*Math.cos(3*t)
+        -Math.cos(4*t);
+
+        points.push({
+            tx:x*30,
+            ty:-y*30
+        });
+    }
+
+    return points;
+}
+
+const heart = createHeart();
+
+// 粒子從中心發射
+heart.forEach(p=>{
+
+    let angle = Math.random()*Math.PI*2;
+    let speed = Math.random()*15+5;
+
+    particles.push({
+
+        x:0,
+        y:0,
+
+        vx:Math.cos(angle)*speed,
+        vy:Math.sin(angle)*speed,
+
+        tx:p.tx,
+        ty:p.ty,
+
+        size:Math.random()*2+1
+
+    });
+
+});
+
+// 2.5秒後形成愛心
+setTimeout(()=>{
+
+    formed = true;
+
+    // 愛心完成後3秒顯示文字
+    setTimeout(()=>{
+        showText = true;
+    },3000);
+
+},2500);
+
+
+// 動畫
+function animate(){
+
+    requestAnimationFrame(animate);
+
+    ctx.fillStyle = "rgba(0,0,0,0.15)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    particles.forEach(p=>{
+
+        if(!formed){
+
+            p.x += p.vx;
+            p.y += p.vy;
+
+            p.vx *= 0.985;
+            p.vy *= 0.985;
+
+        }else{
+
+            p.x += (p.tx-p.x)*0.04;
+            p.y += (p.ty-p.y)*0.04;
+
+        }
+
+        let drawX = canvas.width/2 + p.x;
+        let drawY = canvas.height/2 + p.y;
+
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "pink";
+
+        ctx.beginPath();
+        ctx.arc(drawX,drawY,p.size,0,Math.PI*2);
+
+        ctx.fillStyle = "#ff69b4";
+        ctx.fill();
+    });
+
+    // 顯示文字
+    if(showText){
+
+        ctx.save();
+
+        ctx.font = "bold 70px 微軟正黑體";
+        ctx.textAlign = "center";
+
+        ctx.shadowBlur = 40;
+        ctx.shadowColor = "#ff1493";
+
+        ctx.fillStyle = "#ff69b4";
+
+        ctx.fillText(
+            "❤️ 我愛你 ❤️",
+            canvas.width/2,
+            canvas.height/2 + 280
+        );
+
+        ctx.restore();
+    }
+}
+
+animate();
+
+window.addEventListener("resize",()=>{
+
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+
+});
+
+</script>
+
+</body>
+</html>
